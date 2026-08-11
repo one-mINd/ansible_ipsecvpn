@@ -1,0 +1,17 @@
+---
+- name: Tunnel | Configuration | Ensure ipsec config
+  template:
+    src: ipsec-tunnel.conf
+    dest: /etc/ipsec.conf
+    mode: 0644
+    owner: root
+    group: root
+  notify: IPSec restart
+
+- name: Tunnel | Configuration | Ensure secrets file
+  ansible.builtin.copy:
+    dest: /etc/ipsec.secrets
+    content: |
+      {{ ipsec_tunnel_left }} {{ ipsec_tunnel_right }} : PSK "{{ ipsec_tunnel_psk_secret }}"
+    mode: '0600'
+  notify: IPSec secrets reload

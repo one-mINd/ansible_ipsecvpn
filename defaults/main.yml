@@ -5,6 +5,9 @@ ipsec_server_name: localhost
 ipsec_ios_custom_display_name: "{{ ipsec_server_name }}"
 # Directory to store clients configs in
 ipsec_client_config_dir: /etc/ipsec.d/client_configs
+# The state in which IPsec will be configured. 
+# Possible options: "vpn", "tunnel".
+ipsec_mode: "vpn"
 # Whether we should do iptables configuration by this role
 ipsec_override_iptables: true
 # VPN IP pool
@@ -44,3 +47,10 @@ ipsec_prefix: ipsec
 #   subject: "VPN configuration"
 #   body: "Your new VPN configuration is in attach"
 ipsec_mail: {}
+
+# Tunnel mode condfs
+ipsec_tunnel_left: 10.0.0.1
+ipsec_tunnel_leftsubnet: 10.0.0.0/24
+ipsec_tunnel_right: 11.0.0.2
+ipsec_tunnel_rightsubnet: 11.0.0.0/24
+ipsec_tunnel_psk_secret: None
