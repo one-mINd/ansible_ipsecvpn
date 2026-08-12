@@ -1,4 +1,7 @@
 ---
+- debug:
+    msg: "{{ ipsec_mode }}"
+
 - name: VPN | Checks | Check provided options
   import_tasks: _prechecks.yml
   tags: ['checks']
@@ -8,14 +11,14 @@
   tags: ['vpn_install']
 
 - name: VPN | Installation | Configure VPN server
-  import_tasks: configure_ipsec_vpn.yml
-  tags: ['vpn_config']
-  when: ipsec_mode == "vpn"
+  import_tasks: configure_ipsec_tunnel.yml
+  tags: ['vpn_tunnel']
+  when: ipsec_mode == "tunnel"
 
 - name: VPN | Installation | Configure IPSec tunnel
-  import_tasks: configure_ipsec_tunnel.yml
-  tags: ['tunnel_config']
-  when: ipsec_mode == "tunnel"
+  import_tasks: configure_ipsec_transport.yml
+  tags: ['transport_config']
+  when: ipsec_mode == "transport"
 
 - name: VPN | Installation | Ensure IOS mobileconfigs
   include_tasks: ios.yml
@@ -23,7 +26,7 @@
   loop_control:
     loop_var: client
   tags: ['ipsec_client_configs']
-  when: ipsec_mode == "vpn"
+  when: ipsec_mode == "tunnel"
 
 - name: VPN | Installation | Ensure android sswan configs
   include_tasks: android.yml
@@ -31,7 +34,7 @@
   loop_control:
     loop_var: client
   tags: ['ipsec_client_configs']
-  when: ipsec_mode == "vpn"
+  when: ipsec_mode == "tunnel"
 
 - name: VPN | Installation | Ensure Windows configs
   include_tasks: windows.yml
@@ -39,7 +42,7 @@
   loop_control:
     loop_var: client
   tags: ['ipsec_client_configs']
-  when: ipsec_mode == "vpn"
+  when: ipsec_mode == "tunnel"
 
 - name: VPN | Installation | Ensure linux configs
   include_tasks: linux.yml
@@ -47,16 +50,16 @@
   loop_control:
     loop_var: client
   tags: ['ipsec_client_configs']
-  when: ipsec_mode == "vpn"
+  when: ipsec_mode == "tunnel"
 
 - name: VPN | Installation | Ensure iptables rules
   include_tasks: iptables.yml
   tags: ['iptables']
   when:
   - ipsec_override_iptables
-  - ipsec_mode == "vpn"
+  - ipsec_mode == "tunnel"
 
 - name: VPN | Installation | Prepare system to be ready to be a VPN server
   import_tasks: system_prepare.yml
   tags: ['system_prepare']
-  when: ipsec_mode == "vpn"
+  when: ipsec_mode == "tunnel"

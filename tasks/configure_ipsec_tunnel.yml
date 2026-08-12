@@ -1,17 +1,42 @@
 ---
-- name: Tunnel | Configuration | Ensure ipsec config
+- name: VPN | Configuration | Ensure client config dif
+  file:
+    state: directory
+    path: "{{ ipsec_client_config_dir }}"
+    mode: 0755
+    owner: root
+    group: root
+
+- name: VPN | Configuration | Ensure ipsec config
   template:
-    src: ipsec-tunnel.conf
+    src: ipsec.conf
     dest: /etc/ipsec.conf
     mode: 0644
     owner: root
     group: root
   notify: IPSec restart
 
-- name: Tunnel | Configuration | Ensure secrets file
-  ansible.builtin.copy:
+- name: VPN | Configuration | Ensure ipsec eap-radius config
+  template:
+    src: eap-radius.conf
+    dest: /etc/strongswan.d/charon/eap-radius.conf
+    mode: 0644
+    owner: root
+    group: root
+  notify: IPSec restart
+
+- name: VPN | Configuration | Ensure ipsec secrets
+  template:
+    src: ipsec.secrets
     dest: /etc/ipsec.secrets
-    content: |
-      {{ ipsec_tunnel_left }} {{ ipsec_tunnel_right }} : PSK "{{ ipsec_tunnel_psk_secret }}"
-    mode: '0600'
+    mode: 0600
+    owner: root
+    group: root
   notify: IPSec secrets reload
+
+- name: Ensure local dir to store configs in
+  delegate_to: localhost
+  become: no
+  file:
+    state: directory
+    path: /tmp/ipsec_vpn
