@@ -24,6 +24,7 @@
     owner: root
     group: root
   notify: IPSec restart
+  when: ipsec_eap_radius
 
 - name: VPN | Configuration | Ensure ipsec secrets
   template:

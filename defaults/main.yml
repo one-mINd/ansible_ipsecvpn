@@ -5,9 +5,6 @@ ipsec_server_name: localhost
 ipsec_ios_custom_display_name: "{{ ipsec_server_name }}"
 # Directory to store clients configs in
 ipsec_client_config_dir: /etc/ipsec.d/client_configs
-# The state in which IPsec will be configured. 
-# Possible options: "transport", "tunnel".
-ipsec_mode: "tunnel"
 # Whether we should do iptables configuration by this role
 ipsec_override_iptables: true
 # VPN IP pool
@@ -16,7 +13,6 @@ ipsec_vpn_network: 10.77.0.0/16
 ipsec_vpn_dns: "1.1.1.1,8.8.8.8"
 # TLS data path
 ipsec_cert_path: ""
-ipsec_cacert_path: ""
 ipsec_private_key_path: ""
 # Type of private key. Available options: RSA, ESDSA
 ipsec_private_key_type: ECDSA
@@ -48,9 +44,43 @@ ipsec_prefix: ipsec
 #   body: "Your new VPN configuration is in attach"
 ipsec_mail: {}
 
-# Tunnel mode condfs
-ipsec_transport_left: 10.0.0.1
-ipsec_transport_leftsubnet: 10.0.0.0/24
-ipsec_transport_right: 11.0.0.2
-ipsec_transport_rightsubnet: 11.0.0.0/24
-ipsec_transport_psk_secret: None
+ipsec_eap_radius: true
+ipsec_prepare_system: true
+ipsec_ensure_clients: true
+
+ipsec_conf: |
+  config_setup
+    strictcrlpolicy=yes
+    uniqueids=never
+  ca roadwarrior
+    cacert=""
+  conn roadwarrior
+    auto=add
+    compress=no
+    type=tunnel
+    keyexchange=ikev2
+    fragmentation=yes
+    forceencaps=yes
+    ike=aes256-sha256-modp1024,aes256-sha256-modp2048,aes256gcm16-prfsha384-ecp384
+    esp=aes256gcm16-ecp384
+    dpdaction=clear
+    dpddelay=900s
+    rekey=no
+    left=%any
+    leftid=@example
+    leftcert=""
+    leftsendcert=always
+    leftsubnet=0.0.0.0/0
+    right=%any
+    rightid=%any
+    rightauth=example
+    eap_identity=%any
+    rightdns=8.8.8.8
+    rightsourceip=10.0.0.0/24
+    rightsendcert=never
+
+ipsec_secrets: |
+  {{ ipsec_server_name }} : {{ ipsec_private_key_type }} "{{ ipsec_private_key_path }}"
+  {% for client in ipsec_clients %}
+  {{ client.name }} : EAP "{{ client.secret }}"
+  {% endfor %}
